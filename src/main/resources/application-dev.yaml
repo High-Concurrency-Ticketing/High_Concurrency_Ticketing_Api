@@ -28,7 +28,8 @@ server:
     mbeanregistry:
       enabled: true # Tomcat 매트릭 수집하기 위한 설정
     threads:
-      max: 300
+      max: 1000
+    accept-count: 1200
 
 springdoc:
   api-docs:
