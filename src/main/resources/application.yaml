@@ -21,6 +21,11 @@ spring:
         jdbc:
           time_zone: Asia/Seoul
 
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
 server:
   tomcat:
     max-connections: 100000
