@@ -9,7 +9,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class ApiPrefixConfig implements WebMvcConfigurer {
 
     private static final String PREFIX = "v1";
-    private static final String BASE_PATH = "com.highconcurrency.ticketing.presentation.controller";
+    private static final String BASE_PATH = "com.highconcurrency.ticketing.presentation";
 
     @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
