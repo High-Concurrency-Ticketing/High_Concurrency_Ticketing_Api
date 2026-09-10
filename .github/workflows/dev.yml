@@ -13,7 +13,7 @@ env:
   AWS_REGION: ap-northeast-2
   PROJECT_NAME: high-concurrency-ticketing-api
   DOCKER_IMAGE: sunjaegood/high-concurrency-ticketing-api:dev
-  S3_BUCKET_PATH: s3://test-s3-bucket-for-github-actions/dev
+  S3_BUCKET_PATH: s3://high-concurrency-ticketing/dev
   APP_DIR: /home/ec2-user/app
 
 jobs:
@@ -46,7 +46,6 @@ jobs:
       - name: Upload Files to S3
         run: |
           aws s3 cp docker-compose.yml ${{ env.S3_BUCKET_PATH}}/docker-compose.yml --region ${{env.AWS_REGION }}
-          aws s3 cp scripts/deploy.sh ${{ env.S3_BUCKET_PATH}}/deploy.sh --region ${{env.AWS_REGION }}
 
       - name: Deploy to EC2 by SSM
         run: |
@@ -57,9 +56,8 @@ jobs:
           --parameters 'commands=[
             "mkdir -p ${{ env.APP_DIR }}",
             "aws s3 cp ${{ env.S3_BUCKET_PATH }}/docker-compose.yml ${{ env.APP_DIR }}/docker-compose.yml --region ${{ env.AWS_REGION }}",
-            "aws s3 cp ${{ env.S3_BUCKET_PATH }}/deploy.sh ${{ env.APP_DIR }}/deploy.sh --region ${{ env.AWS_REGION }}",
             "aws ssm get-parameter --name /${{ env.PROJECT_NAME }}/dev/ENV_FILE --with-decryption --region ${{ env.AWS_REGION }} --query Parameter.Value --output text > ${{ env.APP_DIR }}/.env",
-            "chmod 600 ${{ env.APP_DIR }}/.env",
-            "chmod +x ${{ env.APP_DIR }}/deploy.sh",
-            "cd ${{ env.APP_DIR }} && ./deploy.sh"
+            "cd ${{ env.APP_DIR }}",
+            "sudo docker compose pull",
+            "sudo docker compose up -d --remove-orphans"
           ]'
