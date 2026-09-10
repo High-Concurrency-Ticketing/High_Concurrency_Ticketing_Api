@@ -37,16 +37,10 @@ jobs:
       - name: Docker Image Push
         run: docker push ${{ env.DOCKER_IMAGE }}
 
-      - name: Debug OIDC Inputs
-        run: |
-          echo "repository=${{ github.repository }}"
-          echo "ref=${{ github.ref }}"
-          echo "role=arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ env.PROJECT_NAME }}-github-actions-role"
-
       - name: Get AWS Deploy Permission by OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ env.PROJECT_NAME }}-github-actions-role
+          role-to-assume: arn:aws:iam::915703315347:role/${{ env.PROJECT_NAME }}-github-actions-role
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Upload Files to S3
