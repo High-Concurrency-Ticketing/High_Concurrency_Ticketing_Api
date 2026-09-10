@@ -5,43 +5,61 @@ on:
     branches:
       - main
 
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ap-northeast-2
+  PROJECT_NAME: high-concurrency-ticketing-api
+  DOCKER_IMAGE: sunjaegood/high-concurrency-ticketing-api:dev
+  S3_BUCKET_PATH: s3://test-s3-bucket-for-github-actions/dev
+  APP_DIR: /home/ec2-user/app
+
 jobs:
   deploy:
+    name: Build and Deploy to EC2
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Docker Login
-        run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Docker Image Build
-        run: docker build -t sunjaegood/high-concurrency-ticketing-api:dev .
+        run: docker build -t ${{ env.DOCKER_IMAGE }} .
 
       - name: Docker Image Push
-        run: docker push sunjaegood/high-concurrency-ticketing-api:dev
+        run: docker push ${{ env.DOCKER_IMAGE }}
 
-      - name: scp to EC2
-        uses: appleboy/scp-action@v0.1.7
+      - name: Get AWS Deploy Permission by OIDC
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}케
-          source: docker-compose-dev.yml
-          target: /home/ec2-user/api
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ env.PROJECT_NAME }}-github-actions-role
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: SSH로 EC2에 접속
-        uses: appleboy/ssh-action@v1.2.0
-        env:
-          ENV: ${{ secrets.ENV }}
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          envs: ENV
-          script: |
-            cd /home/ec2-user/api
-            echo "$ENV" > .env
-            sudo docker pull sunjaegood/high-concurrency-ticketing-api:dev
-            sudo docker compose -f docker-compose-dev.yml up -d --remove-orphans
+      - name: Upload Files to S3
+        run: |
+          aws s3 cp docker-compose.yml ${{ env.S3_BUCKET_PATH}}/docker-compose.yml --region ${{env.AWS_REGION }}
+          aws s3 cp scripts/deploy.sh ${{ env.S3_BUCKET_PATH}}/deploy.sh --region ${{env.AWS_REGION }}
+
+      - name: Deploy to EC2 by SSM
+        run: |
+          aws ssm send-command \
+          --region ${{ env.AWS_REGION }} \
+          --document-name "AWS-RunShellScript" \
+          --targets "Key=tag:Project,Values=${{ env.PROJECT_NAME }}" \
+          --parameters 'commands=[
+            "mkdir -p ${{ env.APP_DIR }}",
+            "aws s3 cp ${{ env.S3_BUCKET_PATH }}/docker-compose.yml ${{ env.APP_DIR }}/docker-compose.yml --region ${{ env.AWS_REGION }}",
+            "aws s3 cp ${{ env.S3_BUCKET_PATH }}/deploy.sh ${{ env.APP_DIR }}/deploy.sh --region ${{ env.AWS_REGION }}",
+            "aws ssm get-parameter --name /${{ env.PROJECT_NAME }}/dev/ENV_FILE --with-decryption --region ${{ env.AWS_REGION }} --query Parameter.Value --output text > ${{ env.APP_DIR }}/.env",
+            "chmod 600 ${{ env.APP_DIR }}/.env",
+            "chmod +x ${{ env.APP_DIR }}/deploy.sh",
+            "cd ${{ env.APP_DIR }} && ./deploy.sh"
+          ]'
