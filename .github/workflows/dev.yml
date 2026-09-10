@@ -13,7 +13,7 @@ env:
   AWS_REGION: ap-northeast-2
   PROJECT_NAME: high-concurrency-ticketing-api
   DOCKER_IMAGE: sunjaegood/high-concurrency-ticketing-api:dev
-  S3_BUCKET_PATH: s3://high-concurrency-ticketing/dev
+  S3_BUCKET_PATH: s3://high-concurrency-ticketing-s3/dev
   APP_DIR: /home/ec2-user/app
 
 jobs:
@@ -37,6 +37,12 @@ jobs:
       - name: Docker Image Push
         run: docker push ${{ env.DOCKER_IMAGE }}
 
+      - name: Debug OIDC Inputs
+        run: |
+          echo "repository=${{ github.repository }}"
+          echo "ref=${{ github.ref }}"
+          echo "role=arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ env.PROJECT_NAME }}-github-actions-role"
+
       - name: Get AWS Deploy Permission by OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -45,7 +51,7 @@ jobs:
 
       - name: Upload Files to S3
         run: |
-          aws s3 cp docker-compose.yml ${{ env.S3_BUCKET_PATH}}/docker-compose.yml --region ${{env.AWS_REGION }}
+          aws s3 cp docker-compose.yml ${{ env.S3_BUCKET_PATH }}/docker-compose.yml --region ${{ env.AWS_REGION }}
 
       - name: Deploy to EC2 by SSM
         run: |
