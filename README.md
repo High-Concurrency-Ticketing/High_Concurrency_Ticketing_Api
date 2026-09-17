@@ -6,6 +6,7 @@
 
 ---
 
+
 ## 기술 스택
 
 - Language: Java
@@ -17,11 +18,12 @@
 ---
 
 ## AWS 아키텍처
+<img width="650" height="540" alt="aws architecture" src="https://github.com/user-attachments/assets/73c5b060-4bd3-47e4-96f0-b18548201e27" />
 
 ---
 
 ## CI/CD 아키텍처
+<img width="1255" height="709" alt="ticketing ci:cd pipeline" src="https://github.com/user-attachments/assets/cd11c8f1-719d-4e8c-b622-ea5607f1adf3" />
 
----
 
 
