@@ -2,8 +2,12 @@ package com.highconcurrency.ticketing.domain.user;
 
 import com.highconcurrency.ticketing.application.common.ErrorCode;
 import com.highconcurrency.ticketing.application.common.HighConcurrencyTicketingException;
+import com.highconcurrency.ticketing.domain.reservation.Reservation;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -28,6 +32,10 @@ public class User {
 
     @Column(length = 1000)
     private String refreshToken;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Reservation> reservations = new ArrayList<>();
 
     public static User create(String email, String name, String password) {
         return User.builder()
