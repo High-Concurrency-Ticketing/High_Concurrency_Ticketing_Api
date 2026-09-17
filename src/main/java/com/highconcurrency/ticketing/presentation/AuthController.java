@@ -5,11 +5,13 @@ import com.highconcurrency.ticketing.application.common.HighConcurrencyTicketing
 import com.highconcurrency.ticketing.application.usecase.auth.AuthToken;
 import com.highconcurrency.ticketing.application.usecase.auth.AuthUseCase;
 import com.highconcurrency.ticketing.application.usecase.auth.LoginRequest;
+import com.highconcurrency.ticketing.presentation.annotation.CurrentUserId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,6 +46,24 @@ public class AuthController {
 
         AuthToken authToken = authUseCase.reissue(refreshToken);
         return tokenResponse(authToken);
+    }
+
+    @PostMapping("/logout")
+    @Operation(summary = "로그아웃")
+    public ResponseEntity<Void> logout(@CurrentUserId Long userId) {
+        authUseCase.logout(userId);
+
+        ResponseCookie refreshTokenCookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "")
+                .httpOnly(true)
+                .secure(secureCookie)
+                .sameSite(secureCookie ? "None" : "Lax")
+                .path("/v1/auth")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .build();
     }
 
     private ResponseEntity<String> tokenResponse(AuthToken authToken) {

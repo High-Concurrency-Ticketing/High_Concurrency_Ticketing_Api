@@ -45,6 +45,13 @@ public class AuthService implements AuthUseCase {
         return issueToken(user);
     }
 
+    @Override
+    @Transactional
+    public void logout(Long userId) {
+        User user = userUseCase.getUser(userId);
+        user.clearRefreshToken();
+    }
+
     private AuthToken issueToken(User user) {
         String accessToken = tokenPort.createAccessToken(user.getId(), user.getEmail());
         String refreshToken = tokenPort.createRefreshToken(user.getId(), user.getEmail());
