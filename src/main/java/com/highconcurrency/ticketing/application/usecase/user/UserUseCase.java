@@ -6,4 +6,6 @@ public interface UserUseCase {
     Long createUser(UserCreateRequest request);
 
     User getUser(Long userId);
+
+    User getUser(String email);
 }

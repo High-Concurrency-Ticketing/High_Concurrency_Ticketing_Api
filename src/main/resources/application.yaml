@@ -46,3 +46,9 @@ management:
     web:
       exposure:
         include: prometheus
+
+auth:
+  jwt:
+    secret: ${JWT_SECRET_KEY}
+  cookie:
+    secure: ${AUTH_COOKIE_SECURE}

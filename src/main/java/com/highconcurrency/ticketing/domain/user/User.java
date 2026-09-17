@@ -1,5 +1,7 @@
 package com.highconcurrency.ticketing.domain.user;
 
+import com.highconcurrency.ticketing.application.common.ErrorCode;
+import com.highconcurrency.ticketing.application.common.HighConcurrencyTicketingException;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,10 +23,27 @@ public class User {
     @Column(nullable = false)
     private String name;
 
-    public static User create(String email, String name) {
+    @Column(nullable = false)
+    private String password;
+
+    @Column(length = 1000)
+    private String refreshToken;
+
+    public static User create(String email, String name, String password) {
         return User.builder()
                 .email(email)
                 .name(name)
+                .password(password)
                 .build();
+    }
+
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public void equalsRefreshToken(String refreshToken) {
+        if (!this.refreshToken.equals(refreshToken)) {
+            throw new HighConcurrencyTicketingException(ErrorCode.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다.");
+        }
     }
 }
