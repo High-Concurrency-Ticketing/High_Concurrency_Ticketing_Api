@@ -8,4 +8,8 @@ public interface UserUseCase {
     User getUser(Long userId);
 
     User getUser(String email);
+
+    UserResponse updateUser(Long userId, UserUpdateRequest request);
+
+    void deleteUser(Long userId);
 }

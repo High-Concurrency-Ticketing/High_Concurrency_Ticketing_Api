@@ -43,4 +43,18 @@ public class UserService implements UserUseCase {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new HighConcurrencyTicketingException(ErrorCode.NOT_FOUND, "해당 사용자가 없습니다."));
     }
+
+    @Override
+    @Transactional
+    public UserResponse updateUser(Long userId, UserUpdateRequest request) {
+        User user = getUser(userId);
+        user.updateProfile(request.name(), passwordEncoder.encode(request.password()));
+        return UserResponse.from(user);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(Long userId) {
+        userRepository.delete(getUser(userId));
+    }
 }

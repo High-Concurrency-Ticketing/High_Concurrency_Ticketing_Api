@@ -49,8 +49,17 @@ public class User {
         this.refreshToken = refreshToken;
     }
 
+    public void clearRefreshToken() {
+        this.refreshToken = null;
+    }
+
+    public void updateProfile(String name, String password) {
+        this.name = name;
+        this.password = password;
+    }
+
     public void equalsRefreshToken(String refreshToken) {
-        if (!this.refreshToken.equals(refreshToken)) {
+        if (!refreshToken.equals(this.refreshToken)) {
             throw new HighConcurrencyTicketingException(ErrorCode.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다.");
         }
     }
