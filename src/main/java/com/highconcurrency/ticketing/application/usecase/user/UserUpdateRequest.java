@@ -1,7 +1,6 @@
 package com.highconcurrency.ticketing.application.usecase.user;
 
-public record UserCreateRequest(
-        String email,
+public record UserUpdateRequest(
         String name,
         String password
 ) {
