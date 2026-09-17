@@ -50,8 +50,8 @@ public class AuthController {
 
     @PostMapping("/logout")
     @Operation(summary = "로그아웃")
-    public ResponseEntity<Void> logout(@CurrentUserId Long userId) {
-        authUseCase.logout(userId);
+    public ResponseEntity<Void> logout(@CurrentUserId Long currentUserId) {
+        authUseCase.logout(currentUserId);
 
         ResponseCookie refreshTokenCookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "")
                 .httpOnly(true)

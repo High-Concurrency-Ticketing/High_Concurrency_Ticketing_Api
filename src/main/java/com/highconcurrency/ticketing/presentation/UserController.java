@@ -28,20 +28,20 @@ public class UserController {
 
     @GetMapping
     @Operation(summary = "내 정보 조회")
-    public ResponseEntity<UserResponse> getUser(@CurrentUserId Long userId) {
-        return ResponseEntity.ok(UserResponse.from(userUseCase.getUser(userId)));
+    public ResponseEntity<UserResponse> getUser(@CurrentUserId Long currentUserId) {
+        return ResponseEntity.ok(UserResponse.from(userUseCase.getUser(currentUserId)));
     }
 
     @PatchMapping
     @Operation(summary = "내 정보 수정")
-    public ResponseEntity<UserResponse> updateUser(@CurrentUserId Long userId, @RequestBody UserUpdateRequest request) {
-        return ResponseEntity.ok(userUseCase.updateUser(userId, request));
+    public ResponseEntity<UserResponse> updateUser(@CurrentUserId Long currentUserId, @RequestBody UserUpdateRequest request) {
+        return ResponseEntity.ok(userUseCase.updateUser(currentUserId, request));
     }
 
     @DeleteMapping
     @Operation(summary = "회원 탈퇴")
-    public ResponseEntity<Void> deleteUser(@CurrentUserId Long userId) {
-        userUseCase.deleteUser(userId);
+    public ResponseEntity<Void> deleteUser(@CurrentUserId Long currentUserId) {
+        userUseCase.deleteUser(currentUserId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -2,6 +2,7 @@ package com.highconcurrency.ticketing.presentation;
 
 import com.highconcurrency.ticketing.application.usecase.reservationqueue.ReservationQueueStatusResponse;
 import com.highconcurrency.ticketing.application.usecase.reservationqueue.ReservationQueueUseCase;
+import com.highconcurrency.ticketing.presentation.annotation.CurrentUserId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
-@RequestMapping("/reservation-queues/{concertId}/users/{userId}")
+@RequestMapping("/reservation-queues/{concertId}")
 @RequiredArgsConstructor
 @Tag(name = "Reservation Queue")
 public class ReservationQueueController {
@@ -24,18 +25,18 @@ public class ReservationQueueController {
     @Operation(summary = "예약 대기열 진입")
     public ResponseEntity<ReservationQueueStatusResponse> enterReservationQueue(
             @Parameter(description = "콘서트 ID") @PathVariable Long concertId,
-            @Parameter(description = "사용자 ID") @PathVariable Long userId
+            @CurrentUserId Long currentUserId
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(reservationQueueUseCase.enterQueue(concertId, userId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservationQueueUseCase.enterQueue(concertId, currentUserId));
     }
 
     @GetMapping
     @Operation(summary = "예약 대기열 상태 조회")
     public ResponseEntity<ReservationQueueStatusResponse> getReservationQueueStatus(
             @Parameter(description = "콘서트 ID") @PathVariable Long concertId,
-            @Parameter(description = "사용자 ID") @PathVariable Long userId
+            @CurrentUserId Long currentUserId
     ) {
-        return ResponseEntity.ok(reservationQueueUseCase.getQueueStatus(concertId, userId));
+        return ResponseEntity.ok(reservationQueueUseCase.getQueueStatus(concertId, currentUserId));
     }
 
     @GetMapping(
@@ -45,18 +46,18 @@ public class ReservationQueueController {
     @Operation(summary = "예약 대기열 상태 조회 by SSE")
     public SseEmitter getReservationQueueStatusSSE(
             @Parameter(description = "콘서트 ID") @PathVariable Long concertId,
-            @Parameter(description = "사용자 ID") @PathVariable Long userId
+            @CurrentUserId Long currentUserId
     ) {
-        return reservationQueueUseCase.subscribe(concertId, userId);
+        return reservationQueueUseCase.subscribe(concertId, currentUserId);
     }
 
     @DeleteMapping
     @Operation(summary = "예약 대기열 이탈")
     public ResponseEntity<Void> leaveReservationQueue(
             @Parameter(description = "콘서트 ID") @PathVariable Long concertId,
-            @Parameter(description = "사용자 ID") @PathVariable Long userId
+            @CurrentUserId Long currentUserId
     ) {
-        reservationQueueUseCase.leaveQueue(concertId, userId);
+        reservationQueueUseCase.leaveQueue(concertId, currentUserId);
         return ResponseEntity.noContent().build();
     }
 }

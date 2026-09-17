@@ -1,6 +1,7 @@
 package com.highconcurrency.ticketing.presentation;
 
 import com.highconcurrency.ticketing.application.usecase.reservation.ReservationUseCase;
+import com.highconcurrency.ticketing.presentation.annotation.CurrentUserId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,12 +21,12 @@ public class ReservationController {
 
     private final ReservationUseCase reservationUseCase;
 
-    @PostMapping("/{concertId}/users/{userId}")
+    @PostMapping("/{concertId}")
     @Operation(summary = "콘서트 예약")
     public ResponseEntity<Long> reserveTicket(
             @Parameter(description = "콘서트 ID") @PathVariable Long concertId,
-            @Parameter(description = "사용자 ID") @PathVariable Long userId
+            @CurrentUserId Long currentUserId
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(reservationUseCase.createReservation(concertId, userId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservationUseCase.createReservation(concertId, currentUserId));
     }
 }
